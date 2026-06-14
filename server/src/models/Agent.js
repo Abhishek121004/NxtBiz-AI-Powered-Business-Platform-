@@ -1,0 +1,15 @@
+import mongoose from 'mongoose';
+
+const agentSchema = new mongoose.Schema(
+  {
+    agentId: { type: String, required: true, unique: true },
+    name: { type: String, required: true },
+    status: { type: String, default: 'idle' },
+    lastExecution: { type: Date },
+    logs: [{ type: String }],
+    capabilities: [{ type: String }]
+  },
+  { timestamps: true }
+);
+
+export const Agent = mongoose.model('Agent', agentSchema);
