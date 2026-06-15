@@ -134,6 +134,12 @@ The platform provides:
 
 ---
 
+## Development Methodology
+
+NxtBiz follows Spec-Driven Development (SDD), where features are specified and documented before implementation. API contracts, module responsibilities, and workflows are defined upfront to ensure scalability, maintainability, and consistent development practices.
+
+---
+
 # 🚀 Getting Started
 
 ## Clone the Repository
