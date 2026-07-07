@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { api } from '../lib/api.js';
+import { api, getApiErrorMessage } from '../lib/api.js';
 import { useAuthStore } from '../stores/authStore.js';
 import { AuthShell } from '../ui/AuthShell.jsx';
 
@@ -12,18 +12,22 @@ export function RegisterPage() {
 
   async function submit(event) {
     event.preventDefault();
-    const { data } = await api.post('/auth/register', form);
-    setSession(data);
-    toast.success('NxtBiz account created');
-    navigate('/');
+    try {
+      const { data } = await api.post('/auth/register', form);
+      setSession(data);
+      toast.success('NxtBiz account created');
+      navigate('/');
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, 'Unable to create account'));
+    }
   }
 
   return (
     <AuthShell title="Create an operator account">
       <form className="space-y-4" onSubmit={submit}>
-        <input className="input w-full" value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} placeholder="Name" />
-        <input className="input w-full" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} placeholder="Email" />
-        <input className="input w-full" type="password" value={form.password} onChange={(event) => setForm({ ...form, password: event.target.value })} placeholder="Password" />
+        <input className="input w-full" required minLength={2} value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} placeholder="Name" />
+        <input className="input w-full" required type="email" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} placeholder="Email" />
+        <input className="input w-full" required minLength={8} type="password" value={form.password} onChange={(event) => setForm({ ...form, password: event.target.value })} placeholder="Password" />
         <select className="input w-full" value={form.role} onChange={(event) => setForm({ ...form, role: event.target.value })}>
           <option>Employee</option>
           <option>Manager</option>

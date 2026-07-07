@@ -9,7 +9,14 @@ import { ApiError } from '../utils/apiError.js';
 import { hashToken, signAccessToken, signRefreshToken } from '../utils/tokens.js';
 
 const router = Router();
-const credentialsSchema = z.object({ email: z.string().email(), password: z.string().min(8) });
+const credentialsSchema = z.object({
+  email: z.string().trim().email('Enter a valid email address'),
+  password: z.string().min(8, 'Password must be at least 8 characters')
+});
+const registerSchema = credentialsSchema.extend({
+  name: z.string().trim().min(2, 'Name must be at least 2 characters'),
+  role: z.enum(['Admin', 'Manager', 'Employee', 'Viewer']).optional()
+});
 
 function setAuthCookies(res, accessToken, refreshToken) {
   const secure = env.nodeEnv === 'production';
@@ -20,7 +27,10 @@ function setAuthCookies(res, accessToken, refreshToken) {
 router.post(
   '/register',
   asyncHandler(async (req, res) => {
-    const body = credentialsSchema.extend({ name: z.string().min(2), role: z.enum(['Admin', 'Manager', 'Employee', 'Viewer']).optional() }).parse(req.body);
+    const body = registerSchema.parse(req.body);
+    const existingUser = await User.exists({ email: body.email });
+    if (existingUser) throw new ApiError(409, 'An account with this email already exists');
+
     const passwordHash = await bcrypt.hash(body.password, 12);
     const user = await User.create({ name: body.name, email: body.email, passwordHash, role: body.role || 'Employee' });
     const accessToken = signAccessToken(user);

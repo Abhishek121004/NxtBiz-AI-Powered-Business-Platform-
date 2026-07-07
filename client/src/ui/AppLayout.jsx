@@ -56,7 +56,9 @@ export function AppLayout() {
   }, [dark]);
 
   useEffect(() => {
-    const socket = io(import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000', { withCredentials: true });
+    const socketUrl = (import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000').replace(/\/$/, '');
+    const socketOrigin = socketUrl.endsWith('/socket.io') ? socketUrl.replace(/\/socket\.io$/, '') : socketUrl;
+    const socket = io(socketOrigin, { path: '/socket.io', withCredentials: true });
     const events = ['new_email', 'new_ticket', 'invoice_created', 'meeting_created', 'agent_completed', 'workflow_executed'];
     events.forEach((event) => {
       socket.on(event, () => {

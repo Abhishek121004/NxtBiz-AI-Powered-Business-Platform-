@@ -10,10 +10,23 @@ for (const key of requiredInProduction) {
   }
 }
 
+const defaultClientOrigins = [
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+  'https://nxt-biz-ai-powered-business-platform.vercel.app',
+  'https://nxt-biz-ai-business-platform.vercel.app'
+];
+const configuredClientOrigins = (process.env.CLIENT_ORIGINS || process.env.CLIENT_ORIGIN || '')
+  .split(',')
+  .map((origin) => origin.trim().replace(/\/$/, ''))
+  .filter(Boolean);
+const clientOrigins = [...new Set([...configuredClientOrigins, ...defaultClientOrigins])];
+
 export const env = {
   nodeEnv: process.env.NODE_ENV || 'development',
   port: Number(process.env.PORT || 5000),
-  clientOrigin: process.env.CLIENT_ORIGIN || 'http://localhost:5173',
+  clientOrigin: clientOrigins[0],
+  clientOrigins,
   mongoUri: process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/nxtbiz',
   redisUrl: process.env.REDIS_URL || '',
   jwtAccessSecret: process.env.JWT_ACCESS_SECRET || 'local-nxtbiz-access-secret-change-me',
